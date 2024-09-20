@@ -21,12 +21,39 @@ export class NoteListService {
     this.unsubTrash = this.subTrashList();
   }
 
-  async updatNote(colId:string, docID:string, item: {}){
-    await updateDoc(this.getSingleDocRef(colId, docID), item).catch(
-      (err) => {console.error(err) }
-    ).then(
-      () => {console.log("updatNote mit ID", docID, "wurde geupdated");}
-    )
+  /**
+   * Update von Notizen
+   */
+  async updatNote(note: Note){
+    if (note.id) {
+      let docRef = this.getSingleDocRef(this.getColIdFromNote(note), note.id);
+      await updateDoc(docRef, this.getCleanJson(note)).catch(
+        (err) => {console.error(err) }
+      )
+    }
+  }
+
+  /**
+   * Hilfsfunktion um den Boolean-Wert "notes" oder "trash" zurückzugeben
+   */
+  getColIdFromNote(note: Note){
+    if (note.type == "note") {
+      return "notes";
+    } else {
+      return "trash";
+    }
+  }
+
+  /**
+   * Hilfsfunktion um ein sauberes JSON-Objekt zu erhalten
+   */
+  getCleanJson(note: Note){
+    return {
+      type: note.type,
+      title: note.title,
+      content: note.content,
+      marked: note.marked
+    }
   }
 
   /**
