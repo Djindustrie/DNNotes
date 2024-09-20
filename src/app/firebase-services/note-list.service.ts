@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Note } from '../interfaces/note.interface';
-import { Firestore, collection, doc, collectionData, onSnapshot, addDoc } from '@angular/fire/firestore';
+import { Firestore, collection, doc, collectionData, onSnapshot, addDoc, updateDoc } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
 
@@ -21,8 +21,17 @@ export class NoteListService {
     this.unsubTrash = this.subTrashList();
   }
 
+  async updatNote(colId:string, docID:string, item: {}){
+    await updateDoc(this.getSingleDocRef(colId, docID), item).catch(
+      (err) => {console.error(err) }
+    ).then(
+      () => {console.log("updatNote mit ID", docID, "wurde geupdated");}
+    )
+  }
+
   /**
    * Notiz erstellen 
+   * Wird an add-Note-Dialog.ts übergeben
    */
   async addNote(item: Note){
      await addDoc(this.getNotesRef(),item).catch(
