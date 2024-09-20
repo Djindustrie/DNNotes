@@ -8,11 +8,11 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class NoteListService {
-  trashNotes: Note[] = [];
   normalNotes: Note[] = []; 
+  trashNotes: Note[] = [];
 
-  unsubTrash;
   unsubNotes;
+  unsubTrash;
 
   firestore: Firestore = inject(Firestore);
 
@@ -26,20 +26,26 @@ export class NoteListService {
     this.unsubTrash();
   }
 
-  subTrashList() {
-    return onSnapshot(this.getTrashRef(), (list) => {
-      this.trashNotes = [];
-      list.forEach(element => {
-        this.trashNotes.push(this.setNoteObject(element.data(), element.id));
-      })
-    });
-  }
-
+  /**
+   * Abonniert die Notizen
+   */
   subNoteList() {
     return onSnapshot(this.getNotesRef(), (list) => {
       this.normalNotes = [];
       list.forEach(element => {
         this.normalNotes.push(this.setNoteObject(element.data(), element.id));
+      })
+    });
+  }
+
+  /**
+   * Abonniert den Trash
+   */
+  subTrashList() {
+    return onSnapshot(this.getTrashRef(), (list) => {
+      this.trashNotes = [];
+      list.forEach(element => {
+        this.trashNotes.push(this.setNoteObject(element.data(), element.id));
       })
     });
   }
