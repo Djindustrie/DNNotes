@@ -24,7 +24,7 @@ export class NoteListService {
   /**
    * Update von Notizen
    */
-  async updatNote(note: Note){
+  async updateNote(note: Note){
     if (note.id) {
       let docRef = this.getSingleDocRef(this.getColIdFromNote(note), note.id);
       await updateDoc(docRef, this.getCleanJson(note)).catch(
