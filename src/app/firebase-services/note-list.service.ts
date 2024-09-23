@@ -10,15 +10,18 @@ import { Observable } from 'rxjs';
 })
 export class NoteListService {
   normalNotes: Note[] = []; 
+  normalMarkedNotes: Note[] = [];
   trashNotes: Note[] = [];
 
   unsubNotes;
   unsubTrash;
+  unsubMarkedNotes;
 
   firestore: Firestore = inject(Firestore);
 
   constructor() {
     this.unsubNotes = this.subNoteList();
+    this.unsubMarkedNotes = this.subMarkedNotesList();
     this.unsubTrash = this.subTrashList();
   }
 
@@ -90,10 +93,14 @@ export class NoteListService {
   ngonDestroy() {
     this.unsubNotes();
     this.unsubTrash();
+    this.unsubMarkedNotes();
   }
 
   /**
    * Abonniert die Notizen
+   * @orderBy kann man als Filter verwenden
+   * @list in der Dokumentation wird das als Snapshot bezeichnet
+   * @docChanges gibt die Änderungen an den Dokumenten zurück
    */
   subNoteList() {
     const q = query(this.getNotesRef(), orderBy("title"), limit(100));
@@ -101,6 +108,32 @@ export class NoteListService {
       this.normalNotes = [];
       list.forEach(element => {
         this.normalNotes.push(this.setNoteObject(element.data(), element.id));
+      });
+      list.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          console.log("New note: ", change.doc.data());
+        }
+        if (change.type === "modified") {
+          console.log("Modified note: ", change.doc.data());
+        }
+        if (change.type === "removed") {
+          console.log("Removed note: ", change.doc.data());
+        }
+      })
+    });
+  }
+
+  /**
+   * Abonniert die markierten Notizen
+   * @where wird als Filter verwendet
+   * @list in der Dokumentation wird das als Snapshot bezeichnet
+   */
+  subMarkedNotesList() {
+    const q = query(this.getNotesRef(), where("marked", "==", true), limit(100));
+    return onSnapshot(q, (list) => {
+      this.normalMarkedNotes = [];
+      list.forEach(element => {
+        this.normalMarkedNotes.push(this.setNoteObject(element.data(), element.id));
       })
     });
   }
