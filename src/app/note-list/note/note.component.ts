@@ -68,3 +68,15 @@ export class NoteComponent {
     this.noteService.updateNote(this.note)
   }
 }
+
+interface NoteComponentModule {
+  moveToTrash: () => void;
+  moveToNotes: () => void;
+  deleteNote: () => void;
+}
+
+export class NoteComponentModuleImpl implements NoteComponentModule {
+  moveToTrash!: () => void;
+  moveToNotes!: () => void;
+  deleteNote!: () => void;
+}

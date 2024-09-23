@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { Note } from '../interfaces/note.interface';
-import { Firestore, collection, doc, collectionData, onSnapshot, addDoc, updateDoc, deleteDoc } from '@angular/fire/firestore';
+import { query, orderBy, limit, where, Firestore, collection, doc, collectionData, onSnapshot, addDoc, updateDoc, deleteDoc } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
+
 
 
 @Injectable({
@@ -34,12 +35,20 @@ export class NoteListService {
    * Notiz erstellen 
    * Wird an add-Note-Dialog.ts übergeben
    */
-  async addNote(item: Note, colID: "notes" | "trash"){
-     await addDoc(this.getNotesRef(),item).catch(
-      (err) => {console.error(err) }
-    ).then(
-      (docRef) => {console.log("Document mit ID", docRef?.id);}
-    )    
+  async addNote(item: Note, itemFolder:string){
+    if (itemFolder =="notes") {
+      await addDoc(this.getNotesRef(),item).catch(
+        (err) => {console.error(err) }
+      ).then(
+        (docRef) => {console.log("Document mit ID", docRef?.id);}
+      )  
+    } else {
+      await addDoc(this.getTrashRef(),item).catch(
+        (err) => {console.error(err) }
+      ).then(
+        (docRef) => {console.log("Document mit ID", docRef?.id);}
+      )  
+    }
   }
 
 
@@ -87,7 +96,8 @@ export class NoteListService {
    * Abonniert die Notizen
    */
   subNoteList() {
-    return onSnapshot(this.getNotesRef(), (list) => {
+    const q = query(this.getNotesRef(), orderBy("title"), limit(100));
+    return onSnapshot(q, (list) => {
       this.normalNotes = [];
       list.forEach(element => {
         this.normalNotes.push(this.setNoteObject(element.data(), element.id));
